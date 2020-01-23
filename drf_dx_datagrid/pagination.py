@@ -1,4 +1,4 @@
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination, _positive_int
 from rest_framework.response import Response
 from collections import OrderedDict
 
@@ -6,6 +6,29 @@ from collections import OrderedDict
 class TakeSkipPagination(LimitOffsetPagination):
     limit_query_param = 'take'
     offset_query_param = 'skip'
+
+    def get_limit(self, request):
+        if self.limit_query_param:
+            try:
+                return _positive_int(
+                    request.query_params[self.limit_query_param] if self.limit_query_param in request.query_params
+                    else request.data[self.limit_query_param],
+                    strict=True,
+                    cutoff=self.max_limit
+                )
+            except (KeyError, ValueError):
+                pass
+
+        return self.default_limit
+
+    def get_offset(self, request):
+        try:
+            return _positive_int(
+                request.query_params[self.offset_query_param] if self.offset_query_param in request.query_params
+                else request.data[self.offset_query_param],
+            )
+        except (KeyError, ValueError):
+            return 0
 
     def paginate_queryset(self, queryset, request, view=None):
         self.count = self.get_count(queryset)
