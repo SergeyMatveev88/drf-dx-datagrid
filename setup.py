@@ -1,13 +1,25 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='drf_dx_datagrid',
     version='0.1',
     packages=find_packages(),
     url='https://github.com/SergeyMatveev88/drf-dx-datagrid',
     license='MIT',
-    author='Sergey Matveev',
+    author='SergeyMatveev88',
     author_email='dazranagon@yandex.ru',
-    description='Serverside realisation of grouping, filtering and sorting for DevExtreme datagrid on django rest framework',
-    install_requires=['djangorestframework']
+    description='This package provides easy integration between Django REST framework and DevExtreme Data Grid',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    install_requires=['djangorestframework'],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+        'Framework :: Django'
+    ],
+    python_requires='>=3.5',
 )

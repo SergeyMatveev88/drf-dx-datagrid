@@ -1,6 +1,6 @@
 # drf-dx-datagrid
 # Overview
-This package provides easy integration between [Django REST framework](https://www.django-rest-framework.org) and [DevExreme Data Grid](https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/jQuery/Light/)
+This package provides easy integration between [Django REST framework](https://www.django-rest-framework.org) and [DevExtreme Data Grid](https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/jQuery/Light/)
 
 Install drf-dx-datagrid, replace classname ModelViewSet to DxModelViewSet in your django project and it will support devextreme load options and will return a JSON structure that is fully compatible with what Data Grid expects.
 It handles grouping, paging, filtering and ordering on serverside.
