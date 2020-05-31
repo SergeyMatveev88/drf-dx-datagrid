@@ -1,12 +1,16 @@
 # drf-dx-datagrid
 # Overview
-This package provides easy integration between [Django REST framework](https://www.django-rest-framework.org) and [DevExtreme Data Grid](https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/jQuery/Light/)
-
-Install drf-dx-datagrid, replace classname ModelViewSet to DxModelViewSet in your django project and it will support devextreme load options and will return a JSON structure that is fully compatible with what Data Grid expects.
+This package provides easy integration between [Django REST framework](https://www.django-rest-framework.org) and [DevExtreme Data Grid](https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/jQuery/Light/).
 It handles grouping, paging, filtering and ordering on serverside.
-
+#In which case should you use drf-dx-datagrid?
+You have DevExtreme in the frontend and Django REST framework as the backend. And your data is too large to load at once, but you want use grouping and filtering.
+#How it works?
+Drf-dx-datagrid supports devextreme load options in HTTP-request and returns data in format fully compatible with Data Grid. 
+All you need is to replace classname "ModelViewSet" with "DxModelViewSet" in your django project.
+#Installation
+pip install drf-dx-datagrid
 # Configuration
-Define your ModelViewSet classes as on this example:
+Define your ViewSet classes:
 ```python
 from drf_dx_datagrid import DxModelViewSet
 
@@ -14,19 +18,36 @@ class MyModelViewSet(DxModelViewSet):
     serializer_class = MyModelSerializer
     queryset = core.models.MyModel.objects.all()
 ```
-JS example:
-```js
-import CustomStore from 'devextreme/data/custom_store';
-import axios from "axios";
+Example for React.js:
+```jsx
+const load = (loadOptions) => {
+    return axios(`${my_url}`, {
+            params: loadOptions
+        }
+    ).then((response) => response.data
+    )
+}
 
-export const getUpsStore = (my_url, customStoreOptions) => {
-    const load = (loadOptions) => {
-        return axios(`${my_url}`, {
-                params: loadOptions
-            }
-        ).then((response) => response.data
-        )
-    };
-    return new CustomStore({...customStoreOptions, load: load});
+export default class Example extends PureComponent {
+   state={
+       store: new CustomStore({ load: load})
+   }
+
+    render() {
+        return (<DataGrid
+                    dataSource={this.state.store}
+                    height={"100vh"}
+                >
+                    <RemoteOperations groupPaging={true}/>
+                    <Scrolling mode={'virtual'}/>
+                    <HeaderFilter visible={true} allowSearch={true}/>
+                    <Paging defaultPageSize={40}/>
+                    <Sorting mode={"multiple"}/>
+                    <FilterRow visible={true}/>
+                    <GroupPanel visible={true}/>
+                    <Grouping autoExpandAll={false}/>
+                </DataGrid>
+        );
+    }
 }
 ```    

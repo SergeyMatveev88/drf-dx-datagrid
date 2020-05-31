@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setup(
     name='drf_dx_datagrid',
-    version='0.1',
+    version='0.1.1',
     packages=find_packages(),
     url='https://github.com/SergeyMatveev88/drf-dx-datagrid',
     license='MIT',
     author='SergeyMatveev88',
     author_email='dazranagon@yandex.ru',
-    description='This package provides easy integration between Django REST framework and DevExtreme Data Grid',
+    description='This package provides easy integration between Django REST framework and DevExtreme Data Grid. It handles grouping, paging, filtering and ordering on serverside.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=['djangorestframework'],
