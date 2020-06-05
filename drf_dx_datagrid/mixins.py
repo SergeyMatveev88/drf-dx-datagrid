@@ -15,7 +15,9 @@ class DxMixin(object):
             raw_list = request.query_params.getlist(param_name + "[]")
             return [json_loads(x, x) for x in raw_list]
         if param_name in request.query_params:
-            return json.loads(request.query_params.get(param_name))
+            param_value = request.query_params.get(param_name)
+            if param_value != '':
+                return json.loads(param_value)
         return request.data.get(param_name)
 
     @classmethod
