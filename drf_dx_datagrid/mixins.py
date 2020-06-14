@@ -11,13 +11,18 @@ class DxMixin(object):
                 return default
             return json_object
 
-        if param_name + "[]" in request.query_params:
-            raw_list = request.query_params.getlist(param_name + "[]")
-            return [json_loads(x, x) for x in raw_list]
+        param_list = []
         if param_name in request.query_params:
-            param_value = request.query_params.get(param_name)
-            if param_value != '':
-                return json.loads(param_value)
+            param_list = request.query_params.getlist(param_name)
+        elif param_name + "[]" in request.query_params:
+            param_list = request.query_params.getlist(param_name + "[]")
+
+        param_list = [json_loads(x, x) for x in param_list]
+        if len(param_list) == 1:
+            return param_list[0]
+        elif len(param_list) > 1:
+            return param_list
+
         return request.data.get(param_name)
 
     @classmethod
