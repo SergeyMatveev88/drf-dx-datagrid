@@ -54,4 +54,40 @@ export default class Example extends PureComponent {
         );
     }
 }
-```    
+``` 
+Example for jQuery.js:
+```js
+        const load = (loadOptions) => {
+            return axios(`${my_url}`, {
+                    params: loadOptions
+                }
+            ).then((response) => response.data
+            )
+        }
+
+        const store = new DevExpress.data.CustomStore({load: load});
+        $("#gridContainer").dxDataGrid({
+            dataSource: store,
+            height: "100vh",
+            remoteOperations: {
+                groupPaging: true
+            },
+            scrolling: {mode: 'virtual'},
+            headerFilter: {visible: true, allowSearch: true},
+            paging: {defaultPageSize: 40},
+            sorting: {mode: "multiple"},
+            filterRow: {visible: true},
+            groupPanel: {visible: true},
+            grouping: {autoExpandAll: false},
+            summary: {
+                totalItems: [{
+                    column: "id",
+                    summaryType: "count"
+                }],
+                groupItems: [{
+                    column: "id",
+                    summaryType: "min"
+                }]
+            }
+        });
+```   
