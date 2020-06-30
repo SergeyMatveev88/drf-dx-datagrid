@@ -1,7 +1,7 @@
 # drf-dx-datagrid
 # Overview
 This package provides easy integration between [Django REST framework](https://www.django-rest-framework.org) and [DevExtreme Data Grid](https://js.devexpress.com/Demos/WidgetsGallery/Demo/DataGrid/Overview/jQuery/Light/).
-It handles grouping, paging, filtering and ordering on serverside.
+It handles grouping, paging, filtering, aggregating and ordering on serverside.
 # In which case should you use drf-dx-datagrid?
 You have DevExtreme in the frontend and Django REST framework as the backend. And your data is too large to load at once, but you want use grouping and filtering.
 # How it works?
@@ -46,8 +46,48 @@ export default class Example extends PureComponent {
                     <FilterRow visible={true}/>
                     <GroupPanel visible={true}/>
                     <Grouping autoExpandAll={false}/>
+                    <Summary>
+                        <TotalItem column={"id"} summaryType={"count"}/>
+                        <GroupItem column={"name"} summaryType={"max"}/>
+                    </Summary>
                 </DataGrid>
         );
     }
 }
-```    
+``` 
+Example for jQuery.js:
+```js
+        const load = (loadOptions) => {
+            return axios(`${my_url}`, {
+                    params: loadOptions
+                }
+            ).then((response) => response.data
+            )
+        }
+
+        const store = new DevExpress.data.CustomStore({load: load});
+        $("#gridContainer").dxDataGrid({
+            dataSource: store,
+            height: "100vh",
+            remoteOperations: {
+                groupPaging: true
+            },
+            scrolling: {mode: 'virtual'},
+            headerFilter: {visible: true, allowSearch: true},
+            paging: {defaultPageSize: 40},
+            sorting: {mode: "multiple"},
+            filterRow: {visible: true},
+            groupPanel: {visible: true},
+            grouping: {autoExpandAll: false},
+            summary: {
+                totalItems: [{
+                    column: "id",
+                    summaryType: "count"
+                }],
+                groupItems: [{
+                    column: "id",
+                    summaryType: "min"
+                }]
+            }
+        });
+```   

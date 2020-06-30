@@ -2,11 +2,13 @@ from .mixins import DxMixin
 import rest_framework.viewsets
 from django.db.models import Count
 from rest_framework.response import Response
+from collections import OrderedDict
 from .pagination import TakeSkipPagination
 from .filters import DxFilterBackend
+from .summary import SummaryMixin
 
 
-class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin):
+class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin):
     pagination_class = TakeSkipPagination
     filter_backends = [DxFilterBackend, *rest_framework.viewsets.ModelViewSet.filter_backends]
 
@@ -14,11 +16,20 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin):
         queryset = self.filter_queryset(self.get_queryset())
         group = self.get_param_from_request(request, "group")
         if group is None:
-            return self._not_grouped_list(queryset)
+            return self._not_grouped_list(queryset, request)
         else:
             return self._grouped_list(group, queryset, request)
 
     def _grouped_list(self, group, queryset, request):
+        def _format_row_data(row, group_field_name):
+            result = {"key": row[group_field_name], "items": None, "summary": [100], "count": row["count"]}
+            summary_pairs = list(filter(lambda x: x[0].startswith("gs__"), row.items()))
+            if summary_pairs:
+                summary_pairs.sort(key=lambda x: x[0])
+                summary = [x[1] for x in summary_pairs]
+                result["summary"] = summary
+            return result
+
         require_group_count = self.get_param_from_request(request, "requireGroupCount")
         require_total_count = self.get_param_from_request(request, "requireTotalCount")
         if group[0]["isExpanded"]:
@@ -28,6 +39,9 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin):
             ordering = self.get_ordering(group)
             group_queryset = queryset.values(group_field_name).annotate(count=Count("pk")).order_by(
                 *ordering).distinct()
+            group_summary = self.get_param_from_request(request, "groupSummary")
+            if group_summary is not None and group_summary:
+                group_queryset = self.add_summary_annotate(group_queryset, group_summary)
             page = self.paginate_queryset(group_queryset)
             res_dict = {}
             if require_total_count is None and require_group_count is None:
@@ -38,17 +52,22 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin):
                 if require_total_count:
                     res_dict["totalCount"] = queryset.count()
             if page is not None:
-                res_dict["data"] = [{"key": x[group_field_name], "items": None, "count": x["count"]} for x in page]
+                res_dict["data"] = [_format_row_data(x, group_field_name) for x in page]
                 return Response(res_dict)
             else:
-                res_dict["data"] = [{"key": x[group_field_name], "items": None, "count": x["count"]} for x in
-                                    group_queryset]
+                res_dict["data"] = [_format_row_data(x, group_field_name) for x in group_queryset]
             return Response(res_dict)
 
-    def _not_grouped_list(self, queryset):
+    def _not_grouped_list(self, queryset, request):
+        res_dict = OrderedDict()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({"data": serializer.data})
+            res_dict["totalCount"] = self.paginator.count
+        else:
+            serializer = self.get_serializer(queryset, many=True)
+        total_summary = self.get_param_from_request(request, "totalSummary")
+        if total_summary is not None and total_summary:
+            res_dict["summary"] = self.calc_total_summary(queryset, total_summary)
+        res_dict["data"] = serializer.data
+        return Response(res_dict)
