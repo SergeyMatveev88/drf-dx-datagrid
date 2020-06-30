@@ -1,6 +1,7 @@
-#coding: utf-8
+# coding: utf-8
 from django.db.models import *
 from rest_framework.exceptions import ValidationError
+
 
 def _get_aggregate_function(function_name, field_name):
     if function_name == "count":
@@ -19,11 +20,14 @@ def _get_aggregate_function(function_name, field_name):
 
 class SummaryMixin(object):
 
+    def get_aggregate_function(self, function_name, field_name):
+        return _get_aggregate_function(function_name, field_name)
+
     def calc_total_summary(self, queryset, summary_list):
         result = []
         for summary in summary_list:
             field_name = summary["selector"].replace(".", "__")
-            aggr_function = _get_aggregate_function(summary["summaryType"], field_name)
+            aggr_function = self.get_aggregate_function(summary["summaryType"], field_name)
             if aggr_function is None:
                 result.append(None)
             else:
@@ -35,7 +39,7 @@ class SummaryMixin(object):
         summary_param_dict = {}
         for summary in summary_list:
             field_name = summary["selector"].replace(".", "__")
-            aggr_function = _get_aggregate_function(summary["summaryType"], field_name)
+            aggr_function = self.get_aggregate_function(summary["summaryType"], field_name)
             param_name = "gs__"+str(summary_list.index(summary))
             summary_param_dict[param_name] = aggr_function
         return queryset.annotate(**summary_param_dict)
