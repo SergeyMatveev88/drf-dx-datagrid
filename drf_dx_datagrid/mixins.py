@@ -27,9 +27,11 @@ class DxMixin(object):
 
     @classmethod
     def get_ordering(cls, dx_sort_list):
-        if dx_sort_list is None:
-            return []
         result = []
+        if dx_sort_list is None:
+            return result
+        if isinstance(dx_sort_list, dict):
+            dx_sort_list = [dx_sort_list]
         for param in dx_sort_list:
             result.append(("-" if "desc" in param and param["desc"] else '') + param["selector"].replace(".", "__"))
         return result
