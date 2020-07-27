@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='drf_dx_datagrid',
-    version='0.2.3',
+    version='0.2.4',
     packages=find_packages(),
     url='https://github.com/SergeyMatveev88/drf-dx-datagrid',
     license='MIT',
