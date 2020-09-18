@@ -10,6 +10,7 @@ from .summary import SummaryMixin
 
 class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin):
     pagination_class = TakeSkipPagination
+    is_case_sensitive = True
     filter_backends = [DxFilterBackend, *rest_framework.viewsets.ModelViewSet.filter_backends]
 
     def list(self, request, *args, **kwargs):
