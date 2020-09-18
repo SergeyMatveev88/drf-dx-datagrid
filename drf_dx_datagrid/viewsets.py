@@ -41,7 +41,8 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin
                 *ordering).distinct()
             group_summary = self.get_param_from_request(request, "groupSummary")
             if group_summary is not None and group_summary:
-                group_queryset = self.add_summary_annotate(group_queryset, group_summary)
+                group_summary_list = group_summary if isinstance(group_summary, list) else [group_summary]
+                group_queryset = self.add_summary_annotate(group_queryset, group_summary_list)
             page = self.paginate_queryset(group_queryset)
             res_dict = {}
             if require_total_count is None and require_group_count is None:
@@ -68,6 +69,7 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin
             serializer = self.get_serializer(queryset, many=True)
         total_summary = self.get_param_from_request(request, "totalSummary")
         if total_summary is not None and total_summary:
-            res_dict["summary"] = self.calc_total_summary(queryset, total_summary)
+            total_summary_list = total_summary if isinstance(total_summary, list) else [total_summary]
+            res_dict["summary"] = self.calc_total_summary(queryset, total_summary_list)
         res_dict["data"] = serializer.data
         return Response(res_dict)
