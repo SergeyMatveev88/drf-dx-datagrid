@@ -4,7 +4,6 @@ from .mixins import DxMixin
 
 
 class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
-    is_case_sensitive = True
 
     def __is_leaf(self, dx_filter):
         for elem in dx_filter:
