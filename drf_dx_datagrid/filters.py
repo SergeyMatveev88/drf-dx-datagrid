@@ -1,9 +1,13 @@
-from rest_framework import filters
 from django.db.models import Q
+from rest_framework import filters
+
 from .mixins import DxMixin
 
 
 class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
+
+    def __init__(self):
+        self.is_case_sensitive = self.get_case_sensitive()
 
     def __is_leaf(self, dx_filter):
         for elem in dx_filter:
@@ -23,7 +27,7 @@ class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
         elif operator == "<=":
             return "__lte"
         else:
-            return "__" + operator
+            return "__" + operator if self.is_case_sensitive else "__i" + operator
 
     def __leaf_node_to_q(self, leaf):
         field_name = leaf[0].replace(".", "__")
@@ -31,13 +35,23 @@ class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
             kwargs = {}
             kwargs[field_name + "__isnull"] = True
             return Q(**kwargs)
+        elif leaf[1] == "=" and not self.is_case_sensitive and isinstance(leaf[2], str):
+            kwargs = {}
+            kwargs[field_name + "__iexact"] = leaf[2]
+            return Q(**kwargs)
         elif leaf[1] == "<>":
             kwargs = {}
-            kwargs[field_name] = leaf[2]
+            if not self.is_case_sensitive and isinstance(leaf[2], str):
+                kwargs[field_name + "__iexact"] = leaf[2]
+            else:
+                kwargs[field_name] = leaf[2]
             return ~Q(**kwargs)
         elif leaf[1] == "notcontains":
             kwargs = {}
-            kwargs[field_name + "__contains"] = leaf[2]
+            if self.is_case_sensitive:
+                kwargs[field_name + "__contains"] = leaf[2]
+            else:
+                kwargs[field_name + "__icontains"] = leaf[2]
             return ~Q(**kwargs)
         else:
             kwargs = {}
@@ -81,3 +95,10 @@ class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
             if ordering:
                 res_queryset = res_queryset.order_by(*ordering)
         return res_queryset
+
+    def get_case_sensitive(self):
+        from django.conf import settings
+        try:
+            return settings.REST_FRAMEWORK['DRF_DX_DATA_GRID']['FILTER_CASE_SENSITIVE']
+        except (AttributeError, KeyError):
+            return True
