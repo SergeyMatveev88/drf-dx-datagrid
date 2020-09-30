@@ -1,16 +1,17 @@
-from .mixins import DxMixin
+from collections import OrderedDict
+
 import rest_framework.viewsets
 from django.db.models import Count
 from rest_framework.response import Response
-from collections import OrderedDict
-from .pagination import TakeSkipPagination
+
 from .filters import DxFilterBackend
+from .mixins import DxMixin
+from .pagination import TakeSkipPagination
 from .summary import SummaryMixin
 
 
 class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin):
     pagination_class = TakeSkipPagination
-    is_case_sensitive = True
     filter_backends = [DxFilterBackend, *rest_framework.viewsets.ModelViewSet.filter_backends]
 
     def list(self, request, *args, **kwargs):
