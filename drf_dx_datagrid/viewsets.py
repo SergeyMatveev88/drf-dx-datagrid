@@ -34,11 +34,11 @@ class DxModelViewSet(rest_framework.viewsets.ModelViewSet, DxMixin, SummaryMixin
 
         require_group_count = self.get_param_from_request(request, "requireGroupCount")
         require_total_count = self.get_param_from_request(request, "requireTotalCount")
-        if group[0]["isExpanded"]:
+        if group["isExpanded"]:
             return Response()
         else:
-            group_field_name = group[0]["selector"].replace(".", "__")
-            ordering = self.get_ordering(group)
+            group_field_name = group["selector"].replace(".", "__")
+            ordering = self.get_ordering([group])
             group_queryset = queryset.values(group_field_name).annotate(count=Count("pk")).order_by(
                 *ordering).distinct()
             group_summary = self.get_param_from_request(request, "groupSummary")
