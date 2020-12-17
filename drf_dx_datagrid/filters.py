@@ -53,6 +53,10 @@ class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
             else:
                 kwargs[field_name + "__icontains"] = leaf[2]
             return ~Q(**kwargs)
+        elif isinstance(leaf[2], float):
+            kwargs = {}
+            kwargs[field_name + self.__to_django_operator(leaf[1])] = str(leaf[2])
+            return Q(**kwargs)
         else:
             kwargs = {}
             kwargs[field_name + self.__to_django_operator(leaf[1])] = leaf[2]
