@@ -73,17 +73,20 @@ class DxFilterBackend(filters.BaseFilterBackend, DxMixin):
             for elem in dx_filter:
                 if isinstance(elem, list):
                     q_elems.append(self.__generate_q_expr(elem))
-                elif elem in ["and", "or"]:
+                elif elem in ["and", "or", "!"]:
                     q_elems.append(elem)
                 else:
-                    raise Exception("Невозможно применить данный поиск")
-            q_expr = q_elems[0]
-            for num_pair in range(0, len(q_elems) // 2):
-                oper = q_elems[num_pair * 2 + 1]
-                if oper == "and":
-                    q_expr = q_expr & q_elems[(num_pair + 1) * 2]
-                else:
-                    q_expr = q_expr | q_elems[(num_pair + 1) * 2]
+                    raise Exception("Could not implement this search")
+            if q_elems[0] == "!":
+                q_expr = ~q_elems[1]
+            else:
+                q_expr = q_elems[0]
+                for num_pair in range(0, len(q_elems) // 2):
+                    oper = q_elems[num_pair * 2 + 1]
+                    if oper == "and":
+                        q_expr = q_expr & q_elems[(num_pair + 1) * 2]
+                    else:
+                        q_expr = q_expr | q_elems[(num_pair + 1) * 2]
             return q_expr
 
     def filter_queryset(self, request, queryset, view):
