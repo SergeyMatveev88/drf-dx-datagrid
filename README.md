@@ -91,3 +91,10 @@ Example for jQuery.js:
             }
         });
 ```   
+By default, filtering is case-sensitive.If you want case-insensitive behavior, you must set FILTER_CASE_SENSITIVE parameter to false in django settings:
+```
+REST_FRAMEWORK = {
+    'DRF_DX_DATAGRID': {
+        'FILTER_CASE_SENSITIVE': False}
+}
+```
